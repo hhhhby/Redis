@@ -109,4 +109,15 @@ ZipListEntry中的encoding编码分为字符串和整数两种：
    - 1：表示QuickList的首尾各有一个节点不压缩，中间节点压缩
    - 2：表示QuickList的首尾各有两个节点不压缩，中间节点压缩
    - 默认值是0
-     
+
+### QuickList内部结构
+ - <img width="1218" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/a688f656-2a04-46e6-81d3-253b4bdd5ce3">
+ - **特点**
+   - 是一个节点为ZipList的双端链表
+   - 节点采用ZipList，解决了传统链表的内存占用问题
+   - 控制ZipList大小，解决连续内存空间申请效率问题
+   - 中间节点可压缩，进一步节省了内存
+ 
+
+
+
