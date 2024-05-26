@@ -132,4 +132,15 @@ SkipList（跳表）首先是链表，但与传统链表相比有几点差异：
    - 不同层指针到下一节点的跨度不同，层级越高，跨度越大
    - 增删改查效率与红黑树基本一致，实现却更简单
 
+## RedisObject
+Redis中的任意数据类型的键和值都会被封装为一个RedisObject，也叫做Redis对象。
+
+ - 源码实现
+   <img width="1133" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/ac89a536-48b9-4a5e-9018-b3fecf37e505">
+ - String类型的内存占用较大，每个String对象都会含有一个头信息，但是一个List对象中包含多个数据，只含有一个头信息，这样会节省很多空间。
+ - 11种编码方式
+<img width="992" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/94b253c2-f68f-4958-ae49-f0fd1117d0a6">
+ - 数据类型对应的编码方式
+<img width="1023" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/48e7b1a7-9e31-4f0e-bb5b-350fb4584b21">
+
 
