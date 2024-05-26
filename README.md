@@ -45,27 +45,41 @@ typedef struct intset{
      <img width="939" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/a3015161-dbfb-4721-b105-314313607b34">
      
 ## ZipList
-
+ - 压缩列表可以看做一种连续内存空间的“双向链表”（不是真的链表，其地址分配都是连续的）
+ - 列表的节点之间不是通过指针连接，而是记录上一节点和本节点长度来寻址，内存占用较低。
+ - 如果列表数据过多，导致列表过长，可能影响查询性能。
+ - 增加或删除较大数据时可能发生连续更新问题。
 
 
 
 ### ZipListEntry
 ZipListEntry中的encoding编码分为字符串和整数两种：
 
- - 字符串：如果encoding是以“00”、“01”或者“10”开头，则证明content是字符串。
+ - **字符串**：如果encoding是以“00”、“01”或者“10”开头，则证明content是字符串。
 <img width="1068" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/83fc7bb0-fb66-4de6-80c0-37288128a3ff">
 
- - 保存“ab”和“bc”
-   - 确定encoding：“ab”占两个字节，即选择00开头，剩余的6位表示字节的大小，即000010，即encoding为00000010
-   - previous_entry_length：“ab”是第一个entry，因此前一个entry长度为0，则它的值为00000000
-   - content: a对应97（01100001），b对应98（01100010），即0110 0001 0110 0010
-   - “ab”保存为0x00 0x02 0x61 0x62
- - 保存“bc”
-   - 确定encoding：“bc”占两个字节，即选择00开头，剩余的6位表示字节的大小，即000010，即encoding为00000010
-   - previous_entry_length：“bc”的前一个entry为“ab”,encoding为1个字节，previous_entry_length为1个字节，content长度为2个字节，则它的值为00000100
-   - content: b对应98（01100010），b对应99（01100011），即0110 0010 0110 0011
-   - “bc”保存为0x04 0x02 0x62 0x63
- - “ab” “bc”保存为0x000x020x610x620x040x020x620x63
+   - 保存“ab”和“bc”
+     - 确定encoding：“ab”占两个字节，即选择00开头，剩余的6位表示字节的大小，即000010，即encoding为00000010
+     - previous_entry_length：“ab”是第一个entry，因此前一个entry长度为0，则它的值为00000000
+     - content: a对应97（01100001），b对应98（01100010），即0110 0001 0110 0010
+     - “ab”保存为0x00 0x02 0x61 0x62
+   - 保存“bc”
+     - 确定encoding：“bc”占两个字节，即选择00开头，剩余的6位表示字节的大小，即000010，即encoding为00000010
+     - previous_entry_length：“bc”的前一个entry为“ab”,encoding为1个字节，previous_entry_length为1个字节，content长度为2个字节，则它的值为00000100
+     - content: b对应98（01100010），b对应99（01100011），即0110 0010 0110 0011
+     - “bc”保存为0x04 0x02 0x62 0x63
+   - “ab” “bc”保存为0x000x020x610x620x040x020x620x63
 <img width="1162" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/179f670a-8462-4597-b4a7-5c2de6a56e0b">
 
- - 整数：如果encoding是以“11”开始，则证明content是整数，且encoding固定只占用1个字节。
+ - **整数**：如果encoding是以“11”开始，则证明content是整数，且encoding固定只占用1个字节。
+   <img width="1092" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/97bc869a-ef99-44e1-a762-78091c253cd3">
+ - 保存2和5
+   <img width="959" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/348c7e51-a89c-4a4c-9393-b63a726a9797">
+ - ZipList只能从两端进行遍历，如果保存的节点过多，如果要找的节点在中间，则需要遍历很多个节点才能找到。
+ - 因此ZipList需要对节点的个数进行限制。
+### ZipList的连锁更新问题
+
+ - ZipList连续多次空间扩展操作称之为**连锁更新（Cascade Update）**，新增、删除都可能导致连锁更新的发生。 
+
+## QuickList
+
