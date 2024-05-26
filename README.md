@@ -44,7 +44,8 @@ typedef struct intset{
    - 4.最后，将inset的encoding和length属性进行修改。
      <img width="939" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/a3015161-dbfb-4721-b105-314313607b34">
      
+## ZipList
 
-
-
+ - 保存“ab”和“bc”
+ - 确定encoding长度：
 
