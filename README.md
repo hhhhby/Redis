@@ -46,6 +46,15 @@ typedef struct intset{
      
 ## ZipList
 
+
+
+
+### ZipListEntry
+ZipListEntry中的encoding编码分为字符串和整数两种：
+
+ - 字符串：如果encoding是以“00”、“01”或者“10”开头，则证明content是字符串。
+<img width="1068" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/83fc7bb0-fb66-4de6-80c0-37288128a3ff">
+
  - 保存“ab”和“bc”
    - 确定encoding：“ab”占两个字节，即选择00开头，剩余的6位表示字节的大小，即000010，即encoding为00000010
    - previous_entry_length：“ab”是第一个entry，因此前一个entry长度为0，则它的值为00000000
@@ -56,5 +65,7 @@ typedef struct intset{
    - previous_entry_length：“bc”的前一个entry为“ab”,encoding为1个字节，previous_entry_length为1个字节，content长度为2个字节，则它的值为00000100
    - content: b对应98（01100010），b对应99（01100011），即0110 0010 0110 0011
    - “bc”保存为0x04 0x02 0x62 0x63
- -“ab” “bc”保存为ZipList中为0x000x020x610x620x040x020x620x63
+ - “ab” “bc”保存为0x000x020x610x620x040x020x620x63
+<img width="1162" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/179f670a-8462-4597-b4a7-5c2de6a56e0b">
 
+ - 整数：如果encoding是以“11”开始，则证明content是整数，且encoding固定只占用1个字节。
