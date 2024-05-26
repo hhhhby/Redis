@@ -47,5 +47,14 @@ typedef struct intset{
 ## ZipList
 
  - 保存“ab”和“bc”
- - 确定encoding长度：
+   - 确定encoding：“ab”占两个字节，即选择00开头，剩余的6位表示字节的大小，即000010，即encoding为00000010
+   - previous_entry_length：“ab”是第一个entry，因此前一个entry长度为0，则它的值为00000000
+   - content: a对应97（01100001），b对应98（01100010），即0110 0001 0110 0010
+   - “ab”保存为0x00 0x02 0x61 0x62
+ - 保存“bc”
+   - 确定encoding：“bc”占两个字节，即选择00开头，剩余的6位表示字节的大小，即000010，即encoding为00000010
+   - previous_entry_length：“bc”的前一个entry为“ab”,encoding为1个字节，previous_entry_length为1个字节，content长度为2个字节，则它的值为00000100
+   - content: b对应98（01100010），b对应99（01100011），即0110 0010 0110 0011
+   - “bc”保存为0x04 0x02 0x62 0x63
+ -“ab” “bc”保存为ZipList中为0x000x020x610x620x040x020x620x63
 
