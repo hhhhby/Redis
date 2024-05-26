@@ -82,12 +82,21 @@ ZipListEntry中的encoding编码分为字符串和整数两种：
  - ZipList连续多次空间扩展操作称之为**连锁更新（Cascade Update）**，新增、删除都可能导致连锁更新的发生。 
 
 ## QuickList
- - Q1：ZipList虽然节省内存，但申请内存必须是连续空间，如果内存占用较多，申请内存效率较低，怎么办？
+ - Q1：ZipList虽然节省内存，但申请内存必须是连续空间，如果**内存占用较多，申请内存效率较低**，怎么办？
  - A1：限制ZipList的长度和entry的大小
- - Q2：但是就要存储大量数据，超出了ZipList最佳上限改怎么办？
+ - Q2：但是就要存储大量数据，**超出了ZipList最佳上限**该怎么办？
  - A2：创建多个ZipList来分片存储数据
- - Q3：数据拆分比较分散，不方便管理和查找，这多个ZipList如何建立联系？
+ - Q3：数据拆分比较**分散**，不方便管理和查找，这多个ZipList如何建立联系？
  - A3：Redis在3.2版本引入了新的数据结构**QucikList**，它是一个双端链表，只不过链表中的每个节点都是一个ZipList。
- - QuickList结构
+ - **QuickList结构**
    <img width="1283" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/5da8268b-2e36-4076-abc8-082dc88015d7">
+ - 为了避免QuickList中的每个ZipList中entry过多，Redis提供了一个配置项：list-max-ziplist-size来限制
+   - 如果值为正，则代表ZipList的允许的entry个数的最大值
+   - 如果值为负，则代表ZipList的最大内存大小，分5种情况：
+     - -1：每个ZipList的内存占用不能超过4kb
+     - -2：每个ZipList的内存占用不能超过8kb
+     - -3：每个ZipList的内存占用不能超过16kb
+     - -4：每个ZipList的内存占用不能超过32kb
+     - -5：每个ZipList的内存占用不能超过64kb
+   - 其默认值为-2
 
