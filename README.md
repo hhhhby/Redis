@@ -140,7 +140,14 @@ Redis中的任意数据类型的键和值都会被封装为一个RedisObject，�
  - String类型的内存占用较大，每个String对象都会含有一个头信息，但是一个List对象中包含多个数据，只含有一个头信息，这样会节省很多空间。
  - 11种编码方式
 <img width="992" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/94b253c2-f68f-4958-ae49-f0fd1117d0a6">
+ 
  - 数据类型对应的编码方式
 <img width="1023" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/48e7b1a7-9e31-4f0e-bb5b-350fb4584b21">
 
 
+## String（字符串类型）
+
+String是Redis中最常见的数据存储类型
+ 
+ - 其基本编码方式是RAW，基于简单动态字符串（SDS）实现，存储上限为512mb。
+ - 如果存储的SDS长度小于44字节，则会采用EMBSTR编码，此时object head与SDS是一段连续空间。申请内存时只需要调用一次内存分配函数，效率更高。 
