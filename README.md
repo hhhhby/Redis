@@ -43,6 +43,8 @@ typedef struct intset{
      <img width="1178" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/00ebe846-584c-4e66-b465-e9d433defec2">
    - 4.最后，将inset的encoding和length属性进行修改。
      <img width="939" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/a3015161-dbfb-4721-b105-314313607b34">
+## Dict
+
      
 ## ZipList
  - 压缩列表可以看做一种连续内存空间的“双向链表”（不是真的链表，其地址分配都是连续的）
@@ -90,6 +92,7 @@ ZipListEntry中的encoding编码分为字符串和整数两种：
  - A3：Redis在3.2版本引入了新的数据结构**QucikList**，它是一个双端链表，只不过链表中的每个节点都是一个ZipList。
  - **QuickList结构**
    <img width="1283" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/5da8268b-2e36-4076-abc8-082dc88015d7">
+### list-max-ziplist-size：防止entry过多
  - 为了避免QuickList中的每个ZipList中entry过多，Redis提供了一个配置项：list-max-ziplist-size来限制
    - 如果值为正，则代表ZipList的允许的entry个数的最大值
    - 如果值为负，则代表ZipList的最大内存大小，分5种情况：
@@ -100,3 +103,10 @@ ZipListEntry中的encoding编码分为字符串和整数两种：
      - -5：每个ZipList的内存占用不能超过64kb
    - 其默认值为-2
 
+### list-compress-depth：对节点的ZipList做压缩
+ - 通过配置list-compress-depth来控制。首尾不压缩。这个参数是控制首尾不压缩的节点个数：
+   - 0：特殊值，代表不压缩
+   - 1：表示QuickList的首尾各有一个节点不压缩，中间节点压缩
+   - 2：表示QuickList的首尾各有两个节点不压缩，中间节点压缩
+   - 默认值是0
+     
