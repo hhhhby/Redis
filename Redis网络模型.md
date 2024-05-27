@@ -42,4 +42,28 @@
  - 比如服务器端处理客户端Socket请求时，在单线程情况下，只能依次处理每一个socket，如果正在处理的socket恰好未就绪（数据不可读或不可写），线程就会被阻塞，所有其他客户端socket都必须等待，性能自然会很差。
 
 
+ - **文件描述符（File Descriptor）**：简称FD,是一个从0开始提增的无符号整数，用来关联Linux中的一个文件。在Linux中，一切皆文件，例如常规文件、视频、硬件设备等，当然也包括网络套接字（Socket）。
+ - **IO多路复用**：利用单个线程来同时监听多个FD，并在某个FD可读、可写时得到通知，从而避免无效的等待，充分利用CPU资源。
+<img width="784" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/dead7e70-a8ea-4202-9d9d-d2e1da0ff2e6">
+
+ - 监听FD的方式、通知的方式又有多种实现，常见的有：
+   - **select** 
+   - **poll**
+   - 上面两种是早期的方式，这两种方式只知道这么多FD中有一个或多个FD数据准备就绪，但是不知道是哪个FD，只能挨个询问。
+   - **epoll**：这种方式知道哪个FD准备就绪。  
+ - select流程（1.表示用户空间，2.表示内核空间）：
+   - 1.1 创建一个fd集合fd_set,(大小为1024，初始值都未0)
+   <img width="286" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/b73375be-e184-42a3-8abe-a66822d1219d">
+   - 1.2 假如要监听fd=1,2,5,将对应的fd的值设置为1
+   <img width="288" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/445fa60f-ad71-43d3-ba94-3b599a0abf36">
+
+
+
+ - select模式存在的问题：
+   - 需要将整个fd_set从用户空间拷贝到内核空间，select结束还要再次拷贝会用户空间
+   - select无法得知具体是哪个fd就绪，需要遍历整个fd_set
+   - fd_set监听的fd数量不能超过1024
+     
+     
+
 
