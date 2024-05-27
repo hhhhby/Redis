@@ -149,5 +149,40 @@ Redis中的任意数据类型的键和值都会被封装为一个RedisObject，�
 
 String是Redis中最常见的数据存储类型
  
- - 其基本编码方式是RAW，基于简单动态字符串（SDS）实现，存储上限为512mb。
- - 如果存储的SDS长度小于44字节，则会采用EMBSTR编码，此时object head与SDS是一段连续空间。申请内存时只需要调用一次内存分配函数，效率更高。 
+ - 其基本编码方式是**RAW**，基于简单动态字符串（SDS）实现，存储上限为512mb。
+   ![image](https://github.com/hhhhby/Redis/assets/113978854/e87d99a1-830f-4c57-ab4a-45f879e0e3e0)
+
+ - 如果存储的SDS**长度小于44字节**，则会采用**EMBSTR编码**，此时object head与SDS是一段连续空间。申请内存时**只需要调用一次内存分配函数**，效率更高。
+   ![image](https://github.com/hhhhby/Redis/assets/113978854/0d40284a-c9cc-46cb-a1c4-a6e2fd350eb0)
+
+ - 如果存储的字符串是**整数值**，并且大小在LONG_MAX范围内，则会采用**INT编码**：直接将数据保存在RedisObject的ptr指针位置（刚好8字节），不再需要SDS了。
+   ![image](https://github.com/hhhhby/Redis/assets/113978854/7276a81e-cd7c-4d2f-ab86-d4e60365fcf9)
+
+
+
+## List
+Redis的List类型可以从**首、尾**操作列表中的元素。
+ 
+ - 符合上述特征的数据结构有
+   - **LinkedList**：普通链表，可以从双端访问，**内存占用较高，内存碎片较多**
+   - **ZipList**：压缩列表，可以从双端访问，它申请的内存是一片**连续**的地址，**内存占用低**，但是**存储上限低**。
+   - **QuickList**：LinkedList+ZipList，可以从双端访问，每个节点都是一个ZipList,每个ZipList之间用指针链接，因此**内存占用较低**，包含多个ZipList，**存储上限高**。
+ - 3.2版本之前，分别采用ZipList和LinkedList来实现List，如果元素数量小于512并且元素大小小于64字节时采用ZipList编码，超过则采用LinkedList编码。
+ - 3.2版本之后，Redis统一采用QuickList来实现List。
+
+
+## Set
+Set是Redis中的单列集合，满足下列特点：
+
+ - 不保证有序性
+ - 保证元素唯一（可以判断元素是否存在）
+ - 求交集、并集、差集
+
+ - Set对**查询元素的效率要求非常高**
+ - HashTable满足要求，也就是Redis中的Dict，Dict是双列集合（可以存键值对）
+ - SkipList查询的效率也很高，但是它的一个特点是根据得分（score）排序，它是**有序**的。而Set不保证有序。
+
+ - 为了查询效率和唯一性，set采用HT编码（Dict）。Dict中的key用来存储元素，value统一为null。**内存占用较多（指针多）**
+ - 当存储的所有数据都是整数，并且元素数量不超过set-max-intset-entries时，Set会采用IntSet编码，以节省内存。
+ - 
+
