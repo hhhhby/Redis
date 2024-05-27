@@ -183,6 +183,40 @@ Set是Redis中的单列集合，满足下列特点：
  - SkipList查询的效率也很高，但是它的一个特点是根据得分（score）排序，它是**有序**的。而Set不保证有序。
 
  - 为了查询效率和唯一性，set采用HT编码（Dict）。Dict中的key用来存储元素，value统一为null。**内存占用较多（指针多）**
- - 当存储的所有数据都是整数，并且元素数量不超过set-max-intset-entries时，Set会采用IntSet编码，以节省内存。
- - 
+ - 当存储的所有数据都是整数，并且元素数量不超过set-max-intset-entries时，Set会采用IntSet编码，以节省内存。每插入一个元素，都会判断是否是整数，如果不是整数，则编码方式将从OBJ_ENCODING_INTSET改为OBJ_ENCODING_HT
 
+## ZSet
+ZSet也就是SortedSet，其中每一个元素都需要指定一个score值和member值：
+ 
+ - 可以根据score值排序
+ - member必须唯一
+ - 可以根据member查询分数  
+因此，zset底层数据结构必须满足**键值存储、键必须唯一、可排序**这几个需求。
+ - SkipList：可以排序，并且可以同时存储score和ele值（member），满足可排序
+ - HT（Dict）：可以键值存储，并且可以根据key找value
+ - 由于ZSet采用了两种数据结构，因此其内存占用较高（含有大量的指针）
+ - 当元素不多时，HT和SkipList的优势不明显，而且更耗内存。因此ZSet还会采用ZipList结构来节省内存，不过需要同时满足两个条件：
+   - 元素数量小于zset-max-ziplist-entries,默认值为128
+   - 每个元素都小于zset-max-ziplist-value字节，默认值64
+ - ZipList本身没有排序功能，而且没有键值对的概念，因此需要有zset通过编码实现：
+   - ZipList是连续内存，因此score和element是紧挨在一起的两个entry，element在前，score在后
+   - score越小越接近队首，score越大越接近队尾，按照score值升序排列。
+
+
+
+## Hash
+Hash结构与ZSet非常相似
+
+ - 都是键值对存储
+ - 都需求根据键获取值
+ - 键必须唯一  
+
+区别如下：
+ 
+ - zset的键是member,值是score；hash的键和值都是任意值
+ - zset要根据score排序；hash无需排序  
+
+ - 因此Hash默认采用ZipList编码，用以节省内存。ZipList中相邻的两个entry分别保存field和value
+ - 当数据量较大时，Hash结构会转为HT编码，也就是Dict，触发条件有两个：
+   - ZipList中的元素数量超过了hash-max-ziplist-entry(默认512)
+   - ZipList中的任意entry大小超过了hash-max-ziplist-value（默认64）
