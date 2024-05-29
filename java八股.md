@@ -104,8 +104,82 @@
      - 2.String 类被 final 修饰导致其不能被继承，进而避免了子类破坏 String 不可变
    - StringBuffer：可变、线程安全（加了同步锁），对对象本身进行修改
    - StringBulider：可变、非线程安全，对对象本身进行修改
-   - 在 Java 9 之后，String、StringBuilder 与 StringBuffer 的实现改用 **byte** 数组存储字符串（之前使用**char**）。
-     
+   - 在 **Java 9** 之后，String、StringBuilder 与 StringBuffer 的实现改用 **byte** 数组存储字符串（之前使用**char**，这样更加节省空间）。
+
+ - 字符串常量池：JVM为了提升性能和减少内存消耗针对字符串（String类）专门开辟的一块区域，主要目的是为了避免字符串的重复创建
+ - String.intern()：将指定的字符串对象的引用保存在字符串常量池
+
+ - 异常
+   <img width="767" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/ac9b27b2-1e97-4bdd-b0a2-af1a5b980e67">
+ - Exception与Error
+   - Exception：程序本身可以处理，可以通过try-catch
+   - Error：程序无法处理的异常
+
+ - 泛型
+   - Java 泛型（Generics） 是 JDK 5 中引入的一个新特性。使用泛型参数，可以增强代码的可读性以及稳定性
+   - 编译器可以对泛型参数进行检测，并且通过泛型参数可以指定传入的对象类型。
+
+ - 泛型的使用方式
+   - 泛型类
+   ```
+   public class Generic<T>{
+
+       private T key;
+   
+       public Generic(T key){
+           this.key = key;
+       }
+
+       public T getKey(){
+           return key;
+       }
+   }
+   ```
+     - 实例化泛型类  
+       ``Generic<Integer> genericInteger = new Generic<Integer>(123456);``
+   - 泛型接口
+   ```
+   public interface Generator<T>{
+       public T method();
+   }
+   ```
+     - 实现泛型接口，不指定类型：
+       ```
+       class GeneratorImpl<T> implements Generator<T>{
+           @override
+           public T method(){
+               return null;
+           }
+       }
+       ```
+     - 实现泛型接口，指定类型
+       ```
+       class GeneratorImpl<T> implements Generator<String>{
+           @override
+           public String method(){
+               return "hello";
+           }
+       }
+       ```
+   - 泛型方法
+     ```
+     public static <E> void printArray(E[] inputArray){
+         for( E element: inputArray){
+             System.out.printf("%s",element);
+         }
+         System.out.println();
+     }
+     ```
+     - 使用方法
+       ```
+       Integer[] intArray = {1,2,3};
+       String[] stringArray = {"Hello","World"};
+       printArray(intArray);
+       printArray(stringArray);
+       ```
+   - 在 java 中泛型只是一个占位符，必须在传递类型后才能使用
+ - 反射
+   - 2
 ## Redis
  - 缓存穿透（一直访问缓存和数据库都不存在的数据）：
    
