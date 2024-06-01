@@ -176,3 +176,4 @@ int epoll_wait(
  - Reids 6.0引入了多线程，目的是为了**提高IO读写效率**。因此在**解析客户端命令、写响应结果**时采用了多线程。核心的命令执行、IO多路复用模块依然是由主线程执行
 
 
+<img width="1271" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/6a01dfe4-20c0-443d-a86d-92ee7662896f">
