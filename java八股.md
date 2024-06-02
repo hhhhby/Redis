@@ -249,7 +249,24 @@
       - 参数1：proxy，动态生成的代理类
       - 参数2：method，与代理类对象调用的方法相对应
       - 参数3：args，当前method方法的参数
-      - 
+    - 缺点：**只能代理实现了接口的类**
+ - CGLIB动态代理机制
+   - 在运行时可以对**字节码进行修改和动态生成**
+   - 通过**继承**方式实现代理
+   - 一个接口（MethodInterceptor接口）和一个类（Enhancer类）
+     - MethodInterceptor接口
+       - 需要自定义MethodInterceptor 并重写intercept方法，intercept用于拦截增强被代理类的方法
+       ```
+       public interface MethodInterceptor
+       extends Callback{
+           // 拦截被代理类中的方法
+           public Object intercept(Object obj, java.lang.reflect.Method method, Object[] args,MethodProxy proxy) throws Throwable;
+       }
+       ```
+       - 参数1：obj，被代理的对象（需要增强的对象）
+       - 参数2：method，被拦截的方法（需要增强的方法）
+       - 参数3：args，方法入参
+       - 参数4：proxy，用于调用原始方法
 ## Redis
  - 缓存穿透（一直访问缓存和数据库都不存在的数据）：
    
