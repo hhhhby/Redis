@@ -182,6 +182,7 @@ int epoll_wait(
 
 ## RESP协议
 在RESP中，通过首字节的字符来区分不同数据类型，常用的数据类型包括5种。
+
 ### 数据类型
 
  - 单行字符串：首字节是'+',后面跟上单行字符串，以CRLF（“\r\n”）结尾。例如返回“OK”:“+OK/r/n”
@@ -194,3 +195,47 @@ int epoll_wait(
 
  - 数组，首字节是'*',后面跟上数组元素个数，再跟上元素，元素数据类型不限
 ### 模拟Redis客户端
+
+
+
+
+
+
+# Redis内存策略
+
+## 内存回收
+  Redis之所以性能强，最主要的原因就是基于内存存储。然而单节点的Redis其内存大小不宜过大，会影响持久化或主从同步性能
+ - 可以通过**修改配置文件**来设置Redis的最大内存，当内存使用达到上限时，就无法存储更多数据了。
+<img width="685" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/f30605b9-1d70-43fe-a3f9-0a791f4670ee">
+ 
+ ### 过期策略
+ - 利用expire命令
+ - Redis本身是一个典型的key-value内存存储数据库，因此所有的key、value都保存在Dict数据结构中。
+ - 不过在其database结构体中，有两个Dict：一个用来记录key-value；另一个用来记录key-TTL
+   ```
+   typedef struct redisDb {
+       dict *dict;                        /* 存放所有key以及value的地方，也被称为keyspace*/
+       dict *expires;                     /* 存放每一个key及其对应的TTL存活时间，只包含设置了TTL的key*/
+       dict *blocking_keys;               /* Keys with clients waiting for data(BLPOP)*/
+       dict *ready_keys;                  /* Blocked keys that reveived a PUSH*/
+       dict *watched_keys;                /* WATCHED keys for MULTI/EXEC CAS*/
+       int id;                            /* Database ID,0-15*/
+       long long avg_ttl;                 /* 记录平均TTL时间*/
+       unsigned long expires_cursor;      /* expire检查时在dict中抽样的索引位置*/
+       list *defrag_later;                /* 等待碎片整理的key列表*/
+   }redisDb;
+   ```
+ <img width="1255" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/11b980fb-706e-400c-8210-e2ca07be6fa9">
+ - 问题1：Redis是如何知道一个key是否过期呢？
+   - 回答1：利用两个Dict分别记录key-value以及key-ttl对
+ - 问题2：是不是TTL到期就立即删除了呢？（肯定不是，这样会给CPU来带压力）
+   - 惰性删除：**在访问一个key的时候**，检查该key的存活时间，如果已经过期才执行删除
+   - 周期删除：通过一个定时任务，周期性的抽样部分过期的key，然后执行删除。
+     - Redis会设置一个定时任务serverCron()，按照server.hz的频率来执行过期key清理，模式为SLOW
+     - Reids的每个事件循环前会调用beforeSleep()函数，执行过期key清理，模式为FAST
+     
+ 
+ ### 淘汰策略
+
+
+
