@@ -238,5 +238,17 @@ int epoll_wait(
  
  ### 淘汰策略
 
-
+ - 内存淘汰：当Redis内存使用达到设置的阈值时，Redis主动挑选部分key删除以释放更多内存的流程
+ - Redis会在处理客户端命令的方法processCommand()中尝试做内存淘汰（在任何命令执行之前都要检查内存）
+ - Redis支持8种不同策略来选择要删除的key：
+   - noeviction（不淘汰）：不淘汰任何key，但是内存满时不允许写入新数据
+   - volatile-ttl（根据ttl淘汰）：对设置了TTL的key，比较key的剩余TTL值，TTL越小越先被淘汰
+   - allkeys-random（对全体key随机淘汰）：对全体key，随机进行淘汰。也就是从db->dict中随机挑选
+   - volatile-random（对设置了ttl的key随机淘汰）：从db->expires中随机挑选
+   - allkeys-lru（使用LRU算法淘汰，最近使用最少的key）：对全体key，基于LRU算法淘汰
+   - volatile-lru（同上）：对设置了ttl的key，基于LRU算法淘汰
+   - allkeys-lfu（使用LFU算法淘汰,使用频率最少的key）：对全体key，基于LFU算法淘汰
+   - volatile-lfu（同上）：对设置了TTl的key，基于LFU算法淘汰
+- LRU（**L**east **R**ecently **U**sed）：最少最近使用。用当前时间减去最后一次访问时间，这个值越大淘汰优先级越高
+- LFU（**L**east **F**requently **U**sed)：最少频率使用。会统计每个key的访问效率，值越小淘汰优先级越高
 
