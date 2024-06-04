@@ -273,6 +273,35 @@
  - 静态代理和动态代理的对比
    - **灵活性**：动态代理更加灵活，不需要必须实现接口，可以直接代理实现类，并且可以不需要针对每个目标类都创建一个代理类。另外，静态代理中，接口一旦新增加方法，目标对象和代理对象都要进行修改
    - **JVM层面**：静态代理**在编译时**就将接口、实现类、代理类这些都变成了一个个实际的class文件，而动态代理是**在运行时**动态生成类字节码，并加载到JVM中的。
+### JAVA集合
+  Java集合，也叫做容器，主要是由两大接口派生而来
+  - Collection接口：主要用于存放单一元素
+    - 子接口1：List，存储的元素都是有序的
+      - ArrayList与Array(数组)的区别
+        - 1.ArrayList可以动态扩容，Array在创建之后长度不能被改变
+        - 2.ArrayList可以使用泛型来保证类型安全，Array不可以
+        - 3.ArrayList只能存储对象（在存储基本类型时，需要使用其对应的包装类Integer、Double等），Array既可以存储基本类型数据，也可以存储对象
+        - 4.ArrayList支持插入、删除、遍历等常见操作，并且提供了丰富的API操作方法，比如add()，remove（）等。Array只是一个固定长度的数组，只能按照其下标来访问元素，不具备动态添加、删除元素的能力。
+        - 5.ArrayList创建时不需要指定大小，Array需要指定大小。
+    - 子接口2：Set，存储的元素不重复
+    - 子接口3：Queue，按特定的排队规则来确定先后顺序，存储的元素是有序的，可重复的
+  - Map接口：主要存放键值对，key是无序的、不可重复的，每个键最多映射到一个值
+    - HashMap：
+      - JDK1.8之前由数组+链表组成，数组是HashMap的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突）
+      - 1.8之后再解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为8）时，将链表转化为红黑树，以减少搜索时间
+    - LinkedHashMap：
+      - 继承自HashMap,由数组+链表或数组+红黑树组成
+      - 在HashMap的基础上增加了一条双向链表，使得上面的结构可以保持键值对的插入顺序
+      - 通过对链表进行相应的操作，实现了**访问顺序**相关逻辑
+    - HashTable：数组+链表，数组是主体，链表则是为了解决哈希冲突而存在（与HashMap有啥区别？）。
+      - 与HashMap区别
+        - 1.两者父类不同：HashMap是继承自AbstractMap类，而Hashtable是继承自Dictionary类。不过它们都实现了同时实现了map、Cloneable(可复制)、Serializable(可序列化)这三个接口。
+        - 2.对外提供的接口不同：Hashtable比HashMap多提供了elments() 和contains() 两个方法。 elments() 方法继承自 Hashtable的父类Dictionnary。elements() 方法用于返回此Hashtable中的value的枚举。contains()方法判断该Hashtable是否包含传入的value。它的作用与containsValue()一致。事实 上，contansValue() 就只是调用了一下contains() 方法。
+        - 3.对null的支持不同：HashTable：key和value都不能为null，HashMap：key可以为null，但是这样的key只能有一个，因为必须保证key的唯一性;可以有多个 key值对应的value为null
+        - 4.安全性不同：HashMap是非线程安全的，HashTable是线程安全的。
+        - 5.初始容量大小和每次扩充容量大小不同
+        - 6.计算hash值的方法不同
+
 ## Redis
  - 缓存穿透（一直访问缓存和数据库都不存在的数据）：
    
