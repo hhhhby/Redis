@@ -226,6 +226,7 @@ int epoll_wait(
    }redisDb;
    ```
  <img width="1255" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/11b980fb-706e-400c-8210-e2ca07be6fa9">
+ 
  - 问题1：Redis是如何知道一个key是否过期呢？
    - 回答1：利用两个Dict分别记录key-value以及key-ttl对
  - 问题2：是不是TTL到期就立即删除了呢？（肯定不是，这样会给CPU来带压力）
