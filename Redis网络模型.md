@@ -251,4 +251,5 @@ int epoll_wait(
    - volatile-lfu（同上）：对设置了TTl的key，基于LFU算法淘汰
 - LRU（**L**east **R**ecently **U**sed）：最少最近使用。用当前时间减去最后一次访问时间，这个值越大淘汰优先级越高
 - LFU（**L**east **F**requently **U**sed)：最少频率使用。会统计每个key的访问效率，值越小淘汰优先级越高
+<img width="1224" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/242c5b0b-64dc-422b-9cc8-3de7c2abac9f">
 
