@@ -37,8 +37,34 @@
    - 修改数据
    - 删除数据
  - DQL：数据**查询**语言（**查询数据库中表的记录**）
- - DCL：数据**控制**语言（**创建数据库用户、控制数据库的访问权限**）
+   - 基本查询
+     - 查询多个字段：`` select 字段1，字段2，...，字段n from 表名;``
+     - 设置别名：`` select 字段 as '别名' from 表名;``
+     - 去除重复记录：`` select distinct 字段列表 from 表名;``
+   - 条件查询
+     - `` select 字段列表 from 表名 where 条件列表;``
+   - 聚合函数
+     - count：计算数量
+     - avg：计算平均值
+     - max：计算最大值
+     - min：计算最小值
+     - sum：计算和
+     - `` select count/avg/max/min/sum(字段) from 表名;``
+   - 分组查询
+     - group by：`` select 字段列表 from 表名 [where 条件] group by 分组字段名 [having 分组后过滤条件]``
+     - where 与 having 区别
+       - 执行时机不同：where是分组之前进行过滤，having是分组之后进行过滤
+       - 判断条件不同：where不能对聚合函数进行判断，having可以
+   - 排序查询
+     - order by：`` select 字段列表 from 表名 order by 字段1 排序方式1, 字段2 排序方式2``
+     - asc：升序排序
+     - desc：降序排序
+   - 分页查询
+     - limit： ``select 字段列表 from 表名 limit 起始索引,查询记录数;``
+   - 执行顺序
+     <img width="1135" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/929bcfae-01d1-47ce-a675-6454eef85031">
 
+ - DCL：数据**控制**语言（**创建数据库用户、控制数据库的访问权限**）
 
 
 # 索引
