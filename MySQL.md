@@ -7,8 +7,35 @@
    - 使用**SQL语言**操作，标准统一，使用方便
  ## SQL分类
  - DDL：数据**定义**语言（**定义数据库对象**）
-   - `` select database(); #查询当前数据库``
+   - 数据库操作
+     - `` select database(); #查询当前数据库``
+   - 表操作
+     - `` show tables;``
+     - `` desc 表名;``
+     - `` show create table 表名;``
+   - 数据类型
+     - 数值类型
+     <img width="1325" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/dd50b581-a4a9-45fd-94e8-b63c59224922">
+
+     - 字符串类型
+    <img width="838" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/950ecf94-22c7-49c5-b840-428a6ff4b2be">
+     
+     - 日期时间类型
+      <img width="962" alt="image" src="https://github.com/hhhhby/Redis/assets/113978854/903cdd5d-9d11-4e0a-9a46-1ccdbdf056a5">
+      
+   - 表操作-修改
+     - **添加字段**：`` alter table 表名 add 字段名 类型（长度）[comment 注释] [约束];``
+     - **修改数据类型** `` alter table 表名 modify 字段名 新数据类型(长度);``
+     - **修改字段名和字段类型** ``alter table 表名 change 旧字段名 新字段名 类型(长度) [comment 注释] [约束];``
+     - **删除字段** `` alter table 表名 drop 字段名;``
+     - **修改表名** `` alter table rename to 新表名;``
+   - 表操作-删除
+     - 删除表 `` drop table 表名;``
+     - 删除指定表，并重新创建该表 `` truncate table 表名;``
  - DML：数据**操作**语言（**对数据库表中的数据进行增删改**）
+   - 添加数据
+   - 修改数据
+   - 删除数据
  - DQL：数据**查询**语言（**查询数据库中表的记录**）
  - DCL：数据**控制**语言（**创建数据库用户、控制数据库的访问权限**）
 
