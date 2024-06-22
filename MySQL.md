@@ -87,6 +87,19 @@
 - 返回x/y的模：MOD(x,y)
 - 返回0-1的随机数：RAND()
 - 求参数x的四舍五入的值，保留y位小数：ROUND(x,y)
+
+## 日期函数
+
+- curdate() : 返回当前日期
+- curtime() : 返回当前时间
+- now() :     返回当前日期和时间
+- year(date) : 获取指定date的年份
+- month(date): 获取指定date的月份
+- day(date)  : 获取指定date的日期
+- date_add(date,interval expr type) : 返回一个日期/时间值加上一个时间间隔expr后的时间值
+- datediff(date1, date2): 返回起始时间date1 和结束时间date2之间的天数
+
+  
 # 索引
 
  - 定义：一种（帮助存储引擎快速获取数据的）**数据结构**
