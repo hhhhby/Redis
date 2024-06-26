@@ -548,8 +548,118 @@
      - 一本是在数据表中加上一个数据版本号``version``字段，表示数据修改的次数。当数据被修改时，``version``值+1。当线程A要更新数据值时，在读取数据的同时也会读取version值，在提交更新时，若刚才读取到的version值为当前数据库中的version值相等时才更新，否则重试更新操作，直到更新成功。
    - CAS算法
      - CAS的全称是Compare And Swap（比较与交换），用于实现乐观锁，被广泛应用于各大框架中。CAS的思想很简单，就是用一个预期值和要更新的变量值进行比较，两值相等才会进行更新
- - 
- - 
+     - CAS是一个**原子操作**，底层依赖于一条CPU的原子指令
+    
+     - CAS存在的问题
+       - ABA问题（第一次读取的是A，在准备赋值的时候仍然是A。还是有漏洞，就是在读取 -> 赋值的这一段时间，这个A可能被改成了B，然后又被改为了A）
+         - 解决方法：加上版本号或者时间戳
+       - 循环时间长开销大
+       - 只能保证一个共享变量的原子操作（如果有多个共享变量，可以使用**锁**或者利用AtomicReference类把**多个共享变量合并成一个共享变量**来操作）
+    
+#### synchronized 关键字
+   - 主要解决的是多个线程之间访问资源的同步性，可以保证被他修饰的方法或者代码块在任意时刻只能有一个线程执行
+   - Java 6 之后 ``synchronized``引入了大量的优化比如**自旋锁、锁消除、锁粗化、偏向锁、轻量锁**等技术来减少锁操作的开销，这些优化让``synchronized``锁的效率提升了很多。
+ - synchronized的使用方式
+   - 修饰实例方法
+     - 给当前对象实例加锁，进入同步代码前要获得**当前对象实例**的锁。
+       ```
+       symchronized void method(){
+
+       }
+       ```
+   - 修饰静态方法
+     - 给当前类加锁，会作用于类的所有对象实例，进入同步代码前要获得**当前类的锁**
+       ```
+       synchronized static void method(){
+       
+       }
+       ```
+     - 静态成员不属于任何一个实例对象，归整个类所有，不依赖于类的特定实力，被类的所有实例共享。
+   - 修饰代码块（锁指定对象/类）
+     - 对括号里指定的对象/类加锁：
+       - ``synchronized(object)`` 表示进入同步代码库前要获得给定对象的锁
+       - ``synchronized(类.class)``表示进入同步代码前要获得给定Class的锁
+   - ``synchronized`` 关键字加到``static``静态方法和``synchronized(class)``代码块上都是给Class类上锁
+   - ``synchronized``关键字加到实例方法上是给对象实例上锁
+   - 尽量不要使用``synchronized(String a)`` 因为JVM中，字符串常量池具有缓存功能。
+ - 构造方法不能使用``synchronized``修饰，但是可以在构造方法内部使用``synchronized``代码块
+ - ``synchronized``底层原理
+   - synchronized同步语句块的情况
+     ```
+     public class SynchronizedDemo {
+         public void method() {
+             synchronized(this) {
+                 System.out.println("synchronized 代码块");
+             }
+         }
+     }
+     ```
+
+   - 通过JDK自带的``javap``命令查看SynchronizedDemo类的相关字节码信息：首先切换到类的对应目录执行`` javac SynchronizedDemo.java命令生成编译后的.class文件，然后执行``javap -c -s -v -l SynchronizedDemo.class``。
+   - ``synchronized``**同步语句块**的实现使用的是**``monitorenter``**和**``monitorexit``**指令，其中monitorenter指令指向同步代码块的开始位置，monitorexit指令则指明同步代码块的结束为止
+   - ``synchronized``**修饰的方法**没有上述两个指令，使用的是**``ACC_SYNCHRONIZED``**标识，该标识指明了该方法是一个同步方法
+ - synchronized和volatile区别
+   - ``volatile``关键字是线程同步的轻量级实现，所以`volatile``性能比``synchronized``要好，但是``volatile``只能修饰变量，``synchronized``可以修饰**代码块和方法**
+   - ``volatile``关键字能够保证数据的可见性，但不能保证数据的原子性，``synchronized``两者都能保证
+   - ``volatile``关键字主要用于解决**变量在多个线程之间的可见性**，而``synchronized``关键字解决的是**多个线程之间访问资源的同步性**。
+#### ReentrantLock
+ - ``ReentrantLock``实现了``Lock``接口，是一个可重入且独占式的锁，和``synchronized``关键字类似。
+ - ``ReentrantLock``更灵活、强大，增加了轮询、超时、终端、公平锁和非公平锁等高级功能。
+ - ``` public class ReentrantLock implements Lock,java.io.Serializable{} ```
+ - ``ReentrantLock``里面有一个内部类``Sync``，``Sync``继承AQS（AbstractQueuedSynchronizer），添加锁和释放锁的大部分操作实际上都是在``Sync``中实现的。``Sync``有公平锁``FairSync``和非公平锁``NonfairSync``两个子类。
+ - ``ReentrantLock``默认使用非公平锁，也可以通过构造器来显式的指定使用公平锁
+ - ```
+   
+   public ReentrantLock(boolean fair){
+       sync = fair ? new FairSync() : new NonfairSync();
+   }
+   ```
+ - 公平锁与非公平锁区别
+   - 公平锁：锁被释放之后，先申请的线程先得到锁。性能较差一些，因为公平锁为了保证时间上的绝对顺序，上下文切换更频繁。（像排队一样，谁先来，谁先得到锁）
+   - 非公平锁：锁被释放之后，后申请的线程可能会先获取到锁，是随机或者按照其他优先级排序的。性能更好，但可能导致某些线程永远无法获取到锁。
+  
+
+
+ - ReentrantLock和synchronized的区别
+   - 两者都是可重入锁（递归锁）
+     - 可重入锁指的是线程可以再次获取自己的内部锁
+   - synchronized依赖于JVM（看不到源码），而ReentrantLock依赖于API（可以看到源码）
+   - ReentrantLock比synchronized增加了一些高级功能
+     - 等待可中断
+     - 可实现公平锁
+     - 可实现选择性通知（锁可以绑定多个条件）
+ - 可中断锁与不可中断锁的区别
+   - 可中断锁：**获取锁的过程中可以被中断**，不需要一直等到获取锁之后才能进行其他逻辑处理。 ``ReentrantLock``属于可中断锁
+   - 不可中断锁：一旦线程申请了锁，就**只能等到拿到锁以后才能进行其他的逻辑处理**。 ``synchronized``属于不可中断锁
+
+#### ThreadLocal
+ - 使得每一个线程都有自己的专属本地变量
+ - ``ThreadLocal``类主要解决的就是让每个线程绑定自己的值，可以将ThreadLocal类形象的比喻成存放数据的盒子，盒子中可以存储每个线程的**私有数据**
+ - 使用到了``ThreadLocalMap``来存放线程的私有数据，<thread, value>, thread是线程，value是数据
+ - 每个``Thread``都具备一个``ThreadLocalMap``，而``ThreadLocalMap``可以存储以``ThreadLocal``为key,Object对象为value的键值对
+   ```
+   ThreadLocalMap(ThreadLocal<?> firstKey, Object firstValue) {
+       //...
+   }
+   ```
+
+ - ``ThreadLocalMap`` 是 ``ThreadLocal``的静态内部类
+
+ - ThreadLocal内存泄露
+   - ``ThreadLocalMap``中使用的key为``ThreadLocal``的弱引用，而value是强引用。所以，如果``ThreadLocal``没有被外部强引用的情况下，在垃圾回收的时候，key会被清理掉，而value不会被清理掉
+   - 这样一来，``ThreadLocalMap``中就会出现key为null的Entry，这样的话**value永远无法被GC回收**，这个时候就可能会产生内存泄漏。
+   - ``ThreadLocalMap``实现中已经考虑了这种情况，在**调用``set()``、``get()``、``remove()``方法的时候，会清理掉key为null的记录**。
+   - 使用完``ThreadLocal``方法后最好手动调用``remove()``方法。
+
+#### 线程池
+ - What?
+   - 线程池是管理一系列线程的资源池。当有任务要处理时，直接从线程池中获取线程来处理，处理完之后线程并不会立即被销毁，而是等待下一个任务。
+ - Why?
+   - 线程池提供了一种限制和管理资源（包括执行一个任务）的方式
+   - 使用线程的好处
+     - **降低资源消耗**：通过**重复利用**已创建的线程降低线程创建和销毁造成的消耗
+     - **提高响应速度**：当任务到达时，任务可以**不需要等到线程创建就能立即执行**
+     - **提高线程的可管理性**：**线程是稀缺资源**，如果无限制的创建，不仅会消耗系统资源，还会降低系统的稳定性，使用线程池可以进行统一分配，调优和监控
 ## Redis
  - 缓存穿透（一直访问缓存和数据库都不存在的数据）：
    
